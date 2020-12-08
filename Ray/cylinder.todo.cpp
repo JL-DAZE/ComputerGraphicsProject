@@ -108,6 +108,7 @@ bool Cylinder::isInside( Point3D p ) const
 
 void Cylinder::drawOpenGL( GLSLProgram *glslProgram ) const
 {
+	/*
 	this->_material->drawOpenGL(glslProgram);
 
 	glBegin(GL_TRIANGLES);
@@ -122,7 +123,29 @@ void Cylinder::drawOpenGL( GLSLProgram *glslProgram ) const
 		glNormal3d(mt.mv2.normal[0], mt.mv2.normal[1], mt.mv2.normal[2]);
 		glVertex3d(mt.mv2.position[0], mt.mv2.position[1], mt.mv2.position[2]);
 	}
-	glEnd();
+	glEnd();*/
+
+	this->_material->drawOpenGL(glslProgram);
+
+	GLUquadric* q = gluNewQuadric();
+
+	glPushMatrix();
+
+	glTranslatef(center[0], center[1] - height / 2, center[2]);
+	glRotatef(90, -1, 0, 0);
+	gluCylinder(q, radius, radius, height, Shape::OpenGLTessellationComplexity, Shape::OpenGLTessellationComplexity);
+
+	glPushMatrix();
+	glTranslatef(0, 0, height);
+	gluDisk(q, 0, radius, Shape::OpenGLTessellationComplexity, Shape::OpenGLTessellationComplexity);
+	glPopMatrix();
+
+	glRotatef(180, 1, 0, 0); // Normals pointing out
+	gluDisk(q, 0, radius, Shape::OpenGLTessellationComplexity, Shape::OpenGLTessellationComplexity);
+
+	glPopMatrix();
+
+	gluDeleteQuadric(q);
 
 	// Sanity check to make sure that OpenGL state is good
 	ASSERT_OPEN_GL_STATE();	

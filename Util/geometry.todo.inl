@@ -34,21 +34,34 @@ namespace Util
 	template< unsigned int Dim >
 	Matrix< Dim > Matrix< Dim >::Exp( const Matrix &m , int terms )
 	{
-		//////////////////////////////////////
-		// Compute the matrix exponent here //
-		//////////////////////////////////////
-		THROW( "method undefined" );
-		return Matrix();
+		Matrix<Dim> result = Matrix<Dim>();
+		for (int i = 0; i < terms; i++)
+		{
+			Matrix<Dim> temp = Matrix<Dim>::Identity();
+			for (int j = 1; j <= i; j++)
+				temp = m * temp;
+			for (int j = 1; j <= i; j++)
+				temp = temp / j;
+			
+			result = result + temp;
+		}
+
+		return result;
 	}
 
 	template< unsigned int Dim >
 	Matrix< Dim > Matrix< Dim >::closestRotation( void ) const
 	{
-		///////////////////////////////////////
-		// Compute the closest rotation here //
-		///////////////////////////////////////
-		THROW( "method undefined" );
-		return Matrix();
+		Matrix3D m1 = Matrix3D();
+		Matrix3D m2 = Matrix3D();
+		Matrix3D diagonal = Matrix3D();
+
+		this->SVD(m1, diagonal, m2);
+		diagonal(0, 0) = 1.0;
+		diagonal(1, 1) = 1.0;
+		diagonal(2, 2) = (m1 * m2).determinant();
+
+		return (m1 * diagonal * m2);
 	}
 
 	/////////////////

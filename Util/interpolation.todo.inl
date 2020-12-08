@@ -37,42 +37,71 @@ namespace Util
 	template< typename SampleType >
 	SampleType Interpolation::Sample( const std::vector< SampleType > &samples , double t , int interpolationType )
 	{
-		switch( interpolationType )
+		switch (interpolationType)
 		{
 		case NEAREST:
 		{
 			t *= samples.size();
 			int it1 = (int)floor(t);
-			int it2 = ( it1 + 1 ) % samples.size();
+			int it2 = (it1 + 1) % samples.size();
 			t -= it1;
-			if( t<0.5 ) return samples[it1];
+			if (t < 0.5) return samples[it1];
 			else        return samples[it2];
 			break;
 		}
 		case LINEAR:
-			///////////////////////////////////////
-			// Perform linear interpolation here //
-			///////////////////////////////////////
-			THROW( "method undefined" );
-			return samples[0];
+		{
+			t = t * samples.size();
+			int it1 = static_cast<int>(floor(t));
+			int it2 = (it1 + 1) % samples.size();
+			t = t - it1;
+			return (1 - t) * samples[it1] + t * samples[it2];
 			break;
+		}
 		case CATMULL_ROM:
-			////////////////////////////////////////////
-			// Perform Catmull-Rom interpolation here //
-			////////////////////////////////////////////
-			THROW( "method undefined" );
-			return samples[0];
+		{
+			t = t * samples.size();
+			int it1 = static_cast<int>(floor(t));
+			int it2 = (it1 + 1) % samples.size();
+			int it3 = (it1 + 2) % samples.size();
+			int it0 = (it1 - 1) % samples.size();
+			t = t - it1;
+
+			double s = 0.5;
+			double h0 = 2 * pow(t, 3) - 3 * pow(t, 2) + 1;
+			double h1 = -2 * pow(t, 3) + 3 * pow(t, 2);
+			double h2 = pow(t, 3) - 2 * pow(t, 2) + t;
+			double h3 = pow(t, 3) - pow(t, 2);
+			SampleType p0 = samples[it1];
+			SampleType p1 = samples[it2];
+			SampleType t0 = s * (samples[it2] - samples[it0]);
+			SampleType t1 = s * (samples[it3] - samples[it1]);
+
+			return (h0 * p0 + h1 * p1 + h2 * t0 + h3 * t1);
 			break;
+		}
 		case UNIFORM_CUBIC_B_SPLINE:
-			///////////////////////////////////////////////////////
-			// Perform uniform cubic b-spline interpolation here //
-			///////////////////////////////////////////////////////
-			THROW( "method undefined" );
-			return samples[0];
+		{
+			t = t * samples.size();
+			int it1 = static_cast<int>(floor(t));
+			int it2 = (it1 + 1) % samples.size();
+			int it3 = (it1 + 2) % samples.size();
+			int it0 = (it1 - 1) % samples.size();
+			t = t - it1;
+
+			double s = 0.5;
+			double h0 = 2 * pow(t, 3) - 3 * pow(t, 2) + 1;
+			double h1 = -2 * pow(t, 3) + 3 * pow(t, 2);
+			double h2 = pow(t, 3) - 2 * pow(t, 2) + t;
+			double h3 = pow(t, 3) - pow(t, 2);
+			SampleType p0 = (samples[it0] + 4 * samples[it1] + samples[it2]) / 6;
+			SampleType p1 = (samples[it1] + 4 * samples[it2] + samples[it3]) / 6;
+			SampleType t0 = s * (samples[it2] - samples[it0]);
+			SampleType t1 = s * (samples[it3] - samples[it1]);
+
+			return (h0 * p0 + h1 * p1 + h2 * t0 + h3 * t1);
 			break;
-		default:
-			ERROR_OUT( "unrecognized interpolation type" );
-			return samples[0];
+		}
 		}
 	}
 }

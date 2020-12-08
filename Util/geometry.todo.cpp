@@ -38,11 +38,30 @@ namespace Util
 	////////////////////////////
 	Matrix3D EulerRotationParameter::operator() ( void ) const
 	{
-		///////////////////////////////////////////////
-		// Transform Euler angles to a rotation here //
-		///////////////////////////////////////////////
-		THROW( "method undefined" );
-		return Matrix3D();
+		Point3D angles = this->parameter;
+
+		Matrix3D mx = Matrix3D();
+		mx(0, 0) = 1.0;
+		mx(1, 1) = cos(angles[0]);
+		mx(1, 2) = -sin(angles[0]);
+		mx(2, 1) = sin(angles[0]);
+		mx(2, 2) = cos(angles[0]);
+
+		Matrix3D my = Matrix3D();
+		my(0, 0) = cos(angles[1]);
+		my(0, 2) = sin(angles[1]);
+		my(1, 1) = 1.0;
+		my(2, 0) = -sin(angles[1]);
+		my(2, 2) = cos(angles[1]);
+
+		Matrix3D mz = Matrix3D();
+		mz(0, 0) = cos(angles[2]);
+		mz(0, 1) = -sin(angles[2]);
+		mz(1, 0) = sin(angles[2]);
+		mz(1, 1) = cos(angles[2]);
+		mz(2, 2) = 1.0;
+
+		return (mz * my * mx);
 	}
 
 	/////////////////////////////////
@@ -50,10 +69,19 @@ namespace Util
 	/////////////////////////////////
 	Matrix3D QuaternionRotationParameter::operator()( void ) const
 	{
-		////////////////////////////////////////////////////
-		// Transform a unit quaternion to a rotation here //
-		////////////////////////////////////////////////////
-		THROW( "method undefined" );
-		return Matrix3D();
+		Quaternion q = this->parameter;
+		Matrix3D result = Matrix3D();
+
+		result(0, 0) = 1.0 - 2 * q.imag[1] * q.imag[1] - 2 * q.imag[2] * q.imag[2];
+		result(0, 1) = 2 * q.imag[0] * q.imag[1] - 2 * q.real * q.imag[2];
+		result(0, 2) = 2 * q.imag[0] * q.imag[2] + 2 * q.real * q.imag[1];
+		result(1, 0) = 2 * q.imag[0] * q.imag[1] + 2 * q.real * q.imag[2];
+		result(1, 1) = 1.0 - 2 * q.imag[0] * q.imag[0] - 2 * q.imag[2] * q.imag[2];
+		result(1, 2) = 2 * q.imag[1] * q.imag[2] - 2 * q.real * q.imag[0];
+		result(2, 0) = 2 * q.imag[0] * q.imag[2] - 2 * q.real * q.imag[1];
+		result(2, 1) = 2 * q.imag[1] * q.imag[2] + 2 * q.real * q.imag[0];
+		result(2, 2) = 1.0 - 2 * q.imag[0] * q.imag[0] - 2 * q.imag[1] * q.imag[1];
+
+		return result;
 	}
 }
